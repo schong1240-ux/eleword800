@@ -20,6 +20,8 @@ let level = 1;
 let gameInterval;
 let gameSpeed = 1000; // 블록이 떨어지는 속도 (ms)
 
+const BLOCK_TEXT_CHARS = ['NE', '능', '률']; // 사용할 문자들
+
 // 테트로미노 모양 정의 (각 블록의 회전 형태 포함)
 const TETROMINOS = {
     'I': {
@@ -102,6 +104,7 @@ function drawTetromino() {
             const cell = gameBoard.querySelector(`[data-row="${currentTetromino.y + y}"][data-col="${currentTetromino.x + x}"]`);
             if (cell) {
                 cell.classList.remove('tetromino', currentTetromino.colorClass);
+                cell.textContent = ''; // 블록이 움직일 때 이전 텍스트 지우기
             }
         });
     }
@@ -111,9 +114,13 @@ function drawTetromino() {
         for (let c = 0; c < COLS; c++) {
             const cell = gameBoard.querySelector(`[data-row="${r}"][data-col="${c}"]`);
             if (board[r][c] !== 0) {
-                cell.classList.add('tetromino', board[r][c]); // board[r][c]에 색상 클래스 저장
+                // board[r][c]에 색상 클래스와 문자 정보가 함께 들어있다고 가정
+                const blockData = board[r][c]; // 예: { colorClass: 'I', char: 'N' }
+                cell.classList.add('tetromino', blockData.colorClass);
+                cell.textContent = blockData.char;
             } else {
                 cell.classList.remove('tetromino', 'I', 'J', 'L', 'O', 'S', 'T', 'Z'); // 모든 테트로미노 클래스 제거
+                cell.textContent = '';
             }
         }
     }
@@ -125,6 +132,7 @@ function drawTetromino() {
             const cell = gameBoard.querySelector(`[data-row="${currentTetromino.y + y}"][data-col="${currentTetromino.x + x}"]`);
             if (cell) {
                 cell.classList.add('tetromino', currentTetromino.colorClass);
+                cell.textContent = currentTetromino.char; // 현재 블록에도 문자 표시
             }
         });
     }
@@ -135,6 +143,7 @@ function createTetromino() {
     const tetrominoNames = Object.keys(TETROMINOS);
     const randomName = tetrominoNames[Math.floor(Math.random() * tetrominoNames.length)];
     const tetrominoData = TETROMINOS[randomName];
+    const randomChar = BLOCK_TEXT_CHARS[Math.floor(Math.random() * BLOCK_TEXT_CHARS.length)];
 
     return {
         name: randomName,
@@ -142,7 +151,8 @@ function createTetromino() {
         colorClass: randomName, // CSS 클래스 이름으로 사용
         x: Math.floor(COLS / 2) - 1, // 중앙에서 시작
         y: 0, // 맨 위에서 시작
-        rotation: 0
+        rotation: 0,
+        char: randomChar // 랜덤 문자 할당
     };
 }
 
@@ -168,6 +178,7 @@ function drawNextTetromino() {
         const cell = nextBlockDisplay.children[cellIndex];
         if (cell) {
             cell.classList.add('tetromino', nextTetromino.colorClass);
+            cell.textContent = nextTetromino.char; // 다음 블록에도 문자 표시
         }
     });
 }
@@ -234,7 +245,8 @@ function solidifyTetromino() {
         const boardX = currentTetromino.x + x;
         const boardY = currentTetromino.y + y;
         if (boardY >= 0) { // 보드 위로 올라간 블록은 고정하지 않음
-            board[boardY][boardX] = currentTetromino.colorClass;
+            // board에 색상 클래스와 문자 정보를 객체 형태로 저장
+            board[boardY][boardX] = { colorClass: currentTetromino.colorClass, char: currentTetromino.char };
         }
     });
 }

@@ -38,6 +38,12 @@ body {
     background-color: #111;
     border: 1px solid #333;
     box-sizing: border-box;
+    display: flex; /* 텍스트를 중앙에 배치하기 위해 추가 */
+    justify-content: center; /* 가로 중앙 정렬 */
+    align-items: center; /* 세로 중앙 정렬 */
+    font-size: 14px; /* 텍스트 크기 조정 */
+    font-weight: bold; /* 텍스트 굵게 */
+    color: #fff; /* 텍스트 색상 */
 }
 
 .tetromino {
@@ -94,6 +100,8 @@ body {
     background-color: #000;
     border: 1px solid #555;
     margin: 0 auto;
+    display: grid; /* 텍스트 중앙 정렬을 위해 추가 */
+    place-items: center; /* 텍스트 중앙 정렬 */
 }
 
 #score, #lines, #level {
