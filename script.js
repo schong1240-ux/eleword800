@@ -3,6 +3,14 @@
 document.addEventListener('DOMContentLoaded', () => {
     const appContainer = document.getElementById('app-container');
 
+    // 전역 변수 설정
+    let myWordbook = []; // 사용자 단어장 데이터
+    let wordsByDay = []; // 날짜별 단어 묶음
+    const wordsPerDay = 25;
+    const totalLearningDays = Math.ceil(words.length / wordsPerDay); // 총 학습 일수 (32일)
+    let currentLearningDay = 1; // 현재 학습 중인 날짜
+
+    // showScreen 함수 내의 render 호출 순서를 변경하여 탭바가 항상 맨 아래에 있도록 합니다.
     function showScreen(screenId) {
         document.querySelectorAll('.screen').forEach(screen => {
             screen.classList.remove('active');
@@ -12,37 +20,35 @@ document.addEventListener('DOMContentLoaded', () => {
         if (activeScreen) {
             activeScreen.classList.remove('hidden');
             activeScreen.classList.add('active');
-            // 화면이 활성화될 때마다 특정 이벤트 리스너를 다시 연결해야 하는 경우 여기에 추가
+            
+            // 각 화면이 활성화될 때마다 해당 화면의 내용을 다시 렌더링하고 리스너를 설정
             if (screenId.startsWith('onboarding-screen-')) {
                 renderOnboardingScreen(currentOnboardingScreen); // 화면 내용 다시 렌더링
-                // setupOnboardingNavigation(); // renderOnboardingScreen에서 호출하도록 변경
-            }
-            if (screenId === 'login-signup-screen') {
+            } else if (screenId === 'login-signup-screen') {
+                renderLoginSignupScreen();
                 setupLoginSignupListeners();
-            }
-            if (screenId === 'main-dashboard-screen') {
+            } else if (screenId === 'main-dashboard-screen') {
+                renderMainDashboardScreen();
                 setupMainDashboardListeners();
-            }
-            if (screenId === 'learning-selection-screen') {
+            } else if (screenId === 'day-selection-screen') { // 새로운 학습일 선택 화면
+                renderDaySelectionScreen();
+                setupDaySelectionListeners();
+            } else if (screenId === 'learning-selection-screen') {
+                renderLearningSelectionScreen();
                 setupLearningSelectionListeners();
-            }
-            if (screenId === 'word-card-screen') {
+            } else if (screenId === 'word-card-screen') {
                 renderWordCardScreen(); // 단어 카드 내용 업데이트
                 setupWordCardListeners();
-            }
-            if (screenId === 'word-quiz-screen') {
+            } else if (screenId === 'word-quiz-screen') {
                 renderWordQuizScreen(); // 퀴즈 내용 업데이트
                 setupWordQuizListeners();
-            }
-            if (screenId === 'my-wordbook-screen') {
+            } else if (screenId === 'my-wordbook-screen') {
                 renderMyWordbookScreen(); // 단어장 내용 업데이트
                 setupMyWordbookListeners();
-            }
-            if (screenId === 'learning-report-screen') {
+            } else if (screenId === 'learning-report-screen') {
                 renderLearningReportScreen(); // 리포트 내용 업데이트
                 setupLearningReportListeners();
-            }
-            if (screenId === 'settings-screen') {
+            } else if (screenId === 'settings-screen') {
                 renderSettingsScreen(); // 설정 내용 업데이트
                 setupSettingsListeners();
             }
@@ -219,37 +225,71 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('tab-report').onclick = () => showLearningReportScreen();
     }
 
-    // 학습 선택 화면
+    // 학습 선택 화면 (기존) - 이제 Day Selection으로 대체되거나 Day Selection을 포함할 수 있음
     function renderLearningSelectionScreen() {
-        if (!document.getElementById('learning-selection-screen')) {
+        const learningSelectionScreenElement = document.getElementById('learning-selection-screen');
+        if (!learningSelectionScreenElement) {
             appContainer.insertAdjacentHTML('beforeend', `
                 <div id="learning-selection-screen" class="screen hidden">
                     <h2>학습 모드 선택</h2>
-                    <button class="btn-primary" id="new-word-learning">신규 단어 학습</button>
+                    <button class="btn-primary" id="start-day-learning">날짜별 학습 시작</button>
                     <button class="btn-primary" id="review-quiz">복습 퀴즈</button>
                     <button class="btn-primary" id="spelling-practice">스펠링 연습</button>
                     <button class="btn-primary" id="listening-practice">듣기 연습</button>
+                    <button class="btn-primary" id="back-from-learning-selection" style="margin-top: 30px;">뒤로</button>
                 </div>
             `);
         }
     }
 
     function setupLearningSelectionListeners() {
-        document.getElementById('new-word-learning').onclick = () => showWordCardScreen();
+        document.getElementById('start-day-learning').onclick = () => showDaySelectionScreen();
         document.getElementById('review-quiz').onclick = () => showWordQuizScreen();
         document.getElementById('spelling-practice').onclick = () => alert('스펠링 연습 화면 준비 중...');
         document.getElementById('listening-practice').onclick = () => alert('듣기 연습 화면 준비 중...');
+        document.getElementById('back-from-learning-selection').onclick = () => showScreen('main-dashboard-screen');
+    }
+
+    // 새로운 학습일 선택 화면
+    function renderDaySelectionScreen() {
+        const daySelectionScreenElement = document.getElementById('day-selection-screen');
+        if (!daySelectionScreenElement) {
+            appContainer.insertAdjacentHTML('beforeend', `
+                <div id="day-selection-screen" class="screen hidden">
+                    <h2>학습할 날짜 선택</h2>
+                    <div class="day-grid">
+                        ${Array.from({ length: totalLearningDays }, (_, i) => 
+                            `<button class="day-button" data-day="${i + 1}">Day ${i + 1}</button>`
+                        ).join('')}
+                    </div>
+                    <button class="btn-primary" id="day-selection-back-button">뒤로</button>
+                </div>
+            `);
+        }
+    }
+
+    function setupDaySelectionListeners() {
+        document.querySelectorAll('.day-button').forEach(button => {
+            button.onclick = (e) => {
+                currentLearningDay = parseInt(e.target.dataset.day);
+                currentWordIndex = 0; // 선택된 날짜의 첫 단어부터 시작하도록 초기화
+                showWordCardScreen(); // 해당 날짜의 단어 학습 시작
+            };
+        });
+        document.getElementById('day-selection-back-button').onclick = () => showScreen('learning-selection-screen');
     }
 
     // 단어 카드 화면
     let currentWordIndex = 0;
     function renderWordCardScreen() {
-        // 단어 카드 화면은 매번 새로운 단어를 보여주기 위해 내용을 업데이트합니다.
-        const word = words[currentWordIndex];
+        // 현재 학습일에 해당하는 단어 묶음에서 단어를 가져옵니다.
+        const wordsForCurrentDay = wordsByDay[currentLearningDay - 1];
+        const word = wordsForCurrentDay ? wordsForCurrentDay[currentWordIndex] : null;
+
         if (!word) {
-            alert('모든 단어를 학습했습니다!');
+            alert(`${currentLearningDay}일차 모든 단어를 학습했습니다!`);
             currentWordIndex = 0; // 초기화
-            showScreen('main-dashboard-screen');
+            showScreen('day-selection-screen'); // 학습일 선택 화면으로 돌아가기
             return;
         }
 
@@ -257,7 +297,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!wordCardScreenElement) {
             appContainer.insertAdjacentHTML('beforeend', `
                 <div id="word-card-screen" class="screen hidden">
-                    <h2>단어 카드</h2>
+                    <h2>${currentLearningDay}일차 학습</h2>
                     <div class="word-card">
                         <p class="word-spelling"></p>
                         <p class="word-meaning"></p>
@@ -266,12 +306,14 @@ document.addEventListener('DOMContentLoaded', () => {
                         <button id="difficult-word">어려운 단어</button>
                         <button id="next-word">다음 단어</button>
                     </div>
+                    <button class="btn-primary" id="word-card-back-button" style="margin-top: 30px;">뒤로</button>
                 </div>
             `);
         }
         // 단어 내용 업데이트
         const activeWordCardScreen = document.getElementById('word-card-screen');
         if (activeWordCardScreen) {
+            activeWordCardScreen.querySelector('h2').textContent = `${currentLearningDay}일차 학습`;
             activeWordCardScreen.querySelector('.word-spelling').textContent = word.spelling;
             activeWordCardScreen.querySelector('.word-meaning').textContent = word.meaning;
         }
@@ -279,14 +321,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function setupWordCardListeners() {
         document.getElementById('speak-word').onclick = () => {
-            const word = words[currentWordIndex];
+            const wordsForCurrentDay = wordsByDay[currentLearningDay - 1];
+            const word = wordsForCurrentDay ? wordsForCurrentDay[currentWordIndex] : null;
             if (word) {
                 const utterance = new SpeechSynthesisUtterance(word.spelling);
                 speechSynthesis.speak(utterance);
             }
         };
         document.getElementById('memorized-word').onclick = () => {
-            const word = words[currentWordIndex];
+            const wordsForCurrentDay = wordsByDay[currentLearningDay - 1];
+            const word = wordsForCurrentDay ? wordsForCurrentDay[currentWordIndex] : null;
             if (word) {
                 if (!myWordbook.some(w => w.spelling === word.spelling)) {
                     myWordbook.push({ ...word, status: 'memorized' });
@@ -296,7 +340,8 @@ document.addEventListener('DOMContentLoaded', () => {
             moveToNextWordCard();
         };
         document.getElementById('difficult-word').onclick = () => {
-            const word = words[currentWordIndex];
+            const wordsForCurrentDay = wordsByDay[currentLearningDay - 1];
+            const word = wordsForCurrentDay ? wordsForCurrentDay[currentWordIndex] : null;
             if (word) {
                 if (!myWordbook.some(w => w.spelling === word.spelling)) {
                     myWordbook.push({ ...word, status: 'difficult' });
@@ -308,18 +353,34 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('next-word').onclick = () => {
             moveToNextWordCard();
         };
+        document.getElementById('word-card-back-button').onclick = () => {
+            currentWordIndex = 0; // 단어 카드 인덱스 초기화
+            showScreen('day-selection-screen'); // 학습일 선택 화면으로 돌아가기
+        };
     }
 
     function moveToNextWordCard() {
         currentWordIndex++;
-        renderWordCardScreen(); // 새 단어 카드 렌더링
-        showScreen('word-card-screen'); // 화면 표시
+        const wordsForCurrentDay = wordsByDay[currentLearningDay - 1];
+        if (currentWordIndex < wordsForCurrentDay.length) {
+            renderWordCardScreen(); // 새 단어 카드 렌더링
+            showScreen('word-card-screen'); // 화면 표시
+        } else {
+            alert(`${currentLearningDay}일차 모든 단어를 학습했습니다!`);
+            currentWordIndex = 0; // 초기화
+            // 해당 날짜를 완료된 것으로 표시 (선택 사항)
+            const dayButton = document.querySelector(`.day-button[data-day="${currentLearningDay}"]`);
+            if (dayButton) {
+                dayButton.classList.add('completed');
+            }
+            showScreen('day-selection-screen');
+        }
     }
 
     // 단어 퀴즈 화면 (객관식/주관식)
     let currentQuizWordIndex = 0;
     function renderWordQuizScreen() {
-        const word = words[currentQuizWordIndex];
+        const word = words[currentQuizWordIndex]; // 전체 단어 목록에서 퀴즈 단어 가져오기 (날짜별 퀴즈는 추후 구현)
         if (!word) {
             alert('모든 퀴즈를 완료했습니다!');
             currentQuizWordIndex = 0; // 초기화
@@ -366,7 +427,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <button class="btn-primary" id="quiz-back-button" style="margin-top: 20px;">뒤로</button>
                 </div>
             `);
-    } else {
+        } else {
             wordQuizScreenElement.querySelector('#quiz-content').innerHTML = quizContentHtml;
             wordQuizScreenElement.querySelector('.quiz-feedback').textContent = ''; // 피드백 초기화
         }
@@ -374,7 +435,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function setupWordQuizListeners() {
         const word = words[currentQuizWordIndex];
-        if (!word) return; // 단어가 없으면 리스너 설정하지 않음
+        if (!word) return; 
         const correctAnswer = word.spelling;
 
         document.getElementById('quiz-back-button').onclick = () => {
@@ -562,6 +623,11 @@ document.addEventListener('DOMContentLoaded', () => {
         showScreen('learning-selection-screen');
     }
 
+    function showDaySelectionScreen() {
+        renderDaySelectionScreen();
+        showScreen('day-selection-screen');
+    }
+
     function showWordCardScreen() {
         renderWordCardScreen();
         showScreen('word-card-screen');
@@ -587,12 +653,19 @@ document.addEventListener('DOMContentLoaded', () => {
         showScreen('settings-screen');
     }
 
+    // 단어 배열을 25개씩 묶어 날짜별로 나누는 함수
+    function chunkWordsByDay() {
+        wordsByDay = [];
+        for (let i = 0; i < words.length; i += wordsPerDay) {
+            wordsByDay.push(words.slice(i, i + wordsPerDay));
+        }
+    }
+
     // 초기화 함수
     function initializeApp() {
-        // 모든 화면을 한 번만 DOM에 추가하고 hidden 상태로 둡니다.
+        chunkWordsByDay(); // 단어를 날짜별로 묶음
+
         renderSplashScreen();
-        // 모든 온보딩 화면은 renderOnboardingScreen 함수 내에서 순차적으로 관리됩니다.
-        // 초기 렌더링 시에는 첫 번째 온보딩 화면만 active 상태로 두고 나머지는 hidden으로 둠
         renderOnboardingScreen(1); 
         renderOnboardingScreen(2); 
         renderOnboardingScreen(3); 
@@ -600,6 +673,7 @@ document.addEventListener('DOMContentLoaded', () => {
         renderLoginSignupScreen();
         renderMainDashboardScreen();
         renderLearningSelectionScreen();
+        renderDaySelectionScreen(); // 학습일 선택 화면 미리 렌더링
         renderWordCardScreen();
         renderWordQuizScreen();
         renderMyWordbookScreen();
@@ -607,10 +681,10 @@ document.addEventListener('DOMContentLoaded', () => {
         renderSettingsScreen();
 
         // 초기화 시점에 모든 화면의 리스너를 연결 (새로 생성된 요소에 연결되도록)
-        // setupOnboardingNavigation(); // renderOnboardingScreen에서 호출하도록 변경
         setupLoginSignupListeners();
         setupMainDashboardListeners();
         setupLearningSelectionListeners();
+        setupDaySelectionListeners(); // 학습일 선택 화면 리스너 설정
         setupWordCardListeners();
         setupWordQuizListeners();
         setupMyWordbookListeners();

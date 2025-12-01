@@ -329,6 +329,62 @@ button:hover {
     margin-bottom: 15px;
 }
 
+/* 새로운 학습일 선택 화면을 위한 스타일 */
+#day-selection-screen {
+    background-color: var(--background-color);
+    padding-top: 50px;
+    justify-content: flex-start;
+}
+
+#day-selection-screen h2 {
+    color: var(--primary-color);
+    margin-bottom: 30px;
+    font-size: 2em;
+}
+
+.day-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* 한 줄에 4개씩 */
+    gap: 15px;
+    width: 100%;
+    max-width: 380px;
+    padding: 0 10px;
+    margin-bottom: 30px;
+}
+
+.day-button {
+    background-color: var(--surface-color);
+    color: var(--text-color-dark);
+    border: 1px solid var(--border-color);
+    padding: 15px 10px;
+    border-radius: 10px;
+    font-size: 1.2em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-light);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 60px;
+}
+
+.day-button:hover {
+    background-color: var(--primary-light-color);
+    border-color: var(--primary-color);
+    color: var(--surface-color);
+}
+
+.day-button.completed {
+    background-color: #e0f2f7; /* 완료된 날짜 색상 */
+    color: #0097a7;
+    border-color: #0097a7;
+}
+
+.day-button.completed:hover {
+    background-color: #b2ebf2;
+}
+
 /* 단어 카드 화면 */
 #word-card-screen h2 {
     color: var(--primary-color);
