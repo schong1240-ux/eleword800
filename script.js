@@ -63,27 +63,27 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderOnboardingScreen(screenNum) {
         let title = '';
         let description = '';
-        let image = '';
+        let iconHtml = ''; // 이미지를 아이콘 HTML로 변경
 
         if (screenNum === 1) {
             title = '맞춤형 학습';
             description = '학습자 레벨에 맞춰 단어를 추천하고, 효율적인 학습 경로를 제공합니다.';
-            image = 'https://via.placeholder.com/200/6200ee/ffffff?text=Custom+Learning';
+            iconHtml = '<span class="onboarding-icon">🎯</span>'; // 목표 아이콘
         } else if (screenNum === 2) {
             title = '게임화된 요소';
             description = '다양한 퀴즈와 챌린지로 지루함 없이 단어를 마스터하세요.';
-            image = 'https://via.placeholder.com/200/03dac6/ffffff?text=Gamified+Elements';
+            iconHtml = '<span class="onboarding-icon">🎮</span>'; // 게임 아이콘
         } else if (screenNum === 3) {
             title = 'AI 발음 피드백';
             description = '정확한 발음을 위한 AI 피드백으로 자신감을 키워줍니다.';
-            image = 'https://via.placeholder.com/200/bb86fc/ffffff?text=AI+Feedback';
+            iconHtml = '<span class="onboarding-icon">🤖</span>'; // 로봇 아이콘
         }
 
         const onboardingScreenElement = document.getElementById(`onboarding-screen-${screenNum}`);
-        if (!onboardingScreenElement) { // 화면이 없으면 새로 추가
+        if (!onboardingScreenElement) {
             appContainer.insertAdjacentHTML('beforeend', `
                 <div id="onboarding-screen-${screenNum}" class="screen onboarding-screen hidden">
-                    <img src="${image}" alt="${title}">
+                    <div class="onboarding-image-container">${iconHtml}</div>
                     <h2>${title}</h2>
                     <p>${description}</p>
                     <div class="onboarding-dots">
@@ -95,8 +95,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 </div>
             `);
-        } else { // 화면이 있으면 내용만 업데이트
-            onboardingScreenElement.querySelector('img').src = image;
+        } else {
+            onboardingScreenElement.querySelector('.onboarding-image-container').innerHTML = iconHtml;
             onboardingScreenElement.querySelector('h2').textContent = title;
             onboardingScreenElement.querySelector('p').textContent = description;
             onboardingScreenElement.querySelector('.onboarding-dots').innerHTML = 
@@ -105,12 +105,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 `${screenNum > 1 ? '<button id="prev-onboarding">이전</button>' : '<span></span>'}
                 <button id="next-onboarding">${screenNum === totalOnboardingScreens ? '시작하기' : '다음'}</button>`;
         }
+
+        // 온보딩 화면이 렌더링될 때마다 내비게이션 리스너를 다시 설정
+        if (document.getElementById(`onboarding-screen-${screenNum}`).classList.contains('active')) {
+            setupOnboardingNavigation();
+        }
     }
 
     function setupOnboardingNavigation() {
         const nextButton = document.getElementById('next-onboarding');
         const prevButton = document.getElementById('prev-onboarding');
         const currentScreenElement = document.querySelector('.onboarding-screen.active');
+
         if (!currentScreenElement) return;
 
         const screenNum = parseInt(currentScreenElement.id.split('-')[2]);
@@ -119,7 +125,8 @@ document.addEventListener('DOMContentLoaded', () => {
             nextButton.onclick = () => {
                 if (screenNum < totalOnboardingScreens) {
                     currentOnboardingScreen++;
-                    showScreen(`onboarding-screen-${currentOnboardingScreen}`);
+                    renderOnboardingScreen(currentOnboardingScreen); // 다음 화면 내용을 렌더링
+                    showScreen(`onboarding-screen-${currentOnboardingScreen}`); // 다음 화면 활성화
                 } else {
                     showScreen('login-signup-screen');
                 }
@@ -130,7 +137,8 @@ document.addEventListener('DOMContentLoaded', () => {
             prevButton.onclick = () => {
                 if (screenNum > 1) {
                     currentOnboardingScreen--;
-                    showScreen(`onboarding-screen-${currentOnboardingScreen}`);
+                    renderOnboardingScreen(currentOnboardingScreen); // 이전 화면 내용을 렌더링
+                    showScreen(`onboarding-screen-${currentOnboardingScreen}`); // 이전 화면 활성화
                 }
             };
         }
@@ -353,7 +361,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <button class="btn-primary" id="quiz-back-button" style="margin-top: 20px;">뒤로</button>
                 </div>
             `);
-        } else {
+    } else {
             wordQuizScreenElement.querySelector('#quiz-content').innerHTML = quizContentHtml;
             wordQuizScreenElement.querySelector('.quiz-feedback').textContent = ''; // 피드백 초기화
         }
@@ -590,8 +598,15 @@ document.addEventListener('DOMContentLoaded', () => {
         renderLearningReportScreen();
         renderSettingsScreen();
 
-        // 모든 화면의 이벤트 리스너를 초기화 시점에 연결합니다.
-        // showScreen 함수가 호출될 때마다 해당 화면의 리스너를 다시 설정하도록 변경했습니다.
+        // 초기화 시점에 모든 화면의 리스너를 연결 (새로 생성된 요소에 연결되도록)
+        setupLoginSignupListeners();
+        setupMainDashboardListeners();
+        setupLearningSelectionListeners();
+        setupWordCardListeners();
+        setupWordQuizListeners();
+        setupMyWordbookListeners();
+        setupLearningReportListeners();
+        setupSettingsListeners();
     }
 
     initializeApp();
