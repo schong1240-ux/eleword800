@@ -120,20 +120,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function setupOnboardingNavigation() {
-        const nextButton = document.getElementById('next-onboarding');
-        const prevButton = document.getElementById('prev-onboarding');
         const currentScreenElement = document.querySelector('.onboarding-screen.active');
-
-        // 현재 활성화된 온보딩 화면이 없으면 리스너를 설정하지 않음
         if (!currentScreenElement) return;
 
+        const nextButton = currentScreenElement.querySelector('#next-onboarding'); // 활성화된 화면 내부에서 버튼 선택
+        const prevButton = currentScreenElement.querySelector('#prev-onboarding'); // 활성화된 화면 내부에서 버튼 선택
+        
         const screenNum = parseInt(currentScreenElement.id.split('-')[2]);
 
         if (nextButton) {
             nextButton.onclick = () => {
                 if (screenNum < totalOnboardingScreens) {
                     currentOnboardingScreen++;
-                    // renderOnboardingScreen(currentOnboardingScreen); // 다음 화면 내용은 showScreen에서 업데이트
                     showScreen(`onboarding-screen-${currentOnboardingScreen}`); 
                 } else {
                     showScreen('login-signup-screen');
@@ -145,7 +143,6 @@ document.addEventListener('DOMContentLoaded', () => {
             prevButton.onclick = () => {
                 if (screenNum > 1) {
                     currentOnboardingScreen--;
-                    // renderOnboardingScreen(currentOnboardingScreen); // 이전 화면 내용은 showScreen에서 업데이트
                     showScreen(`onboarding-screen-${currentOnboardingScreen}`); 
                 }
             };
