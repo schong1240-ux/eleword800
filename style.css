@@ -446,6 +446,16 @@ button:hover {
     margin-bottom: 40px;
 }
 
+.word-image {
+    width: 100%;
+    max-width: 260px;
+    height: auto;
+    margin-bottom: 20px;
+    border-radius: 15px;
+    object-fit: cover;
+    box-shadow: var(--shadow-light);
+}
+
 .word-spelling {
     font-size: 3em;
     font-weight: 700;

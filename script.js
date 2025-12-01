@@ -328,6 +328,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="word-card">
                         <p class="word-spelling"></p>
                         <p class="word-meaning"></p>
+                        <img class="word-image" id="word-image" alt="단어 이미지" />
                         <button id="speak-word">발음 듣기</button>
                         <button id="memorized-word">암기 완료</button>
                         <button id="difficult-word">어려운 단어</button>
@@ -343,6 +344,18 @@ document.addEventListener('DOMContentLoaded', () => {
             activeWordCardScreen.querySelector('h2').textContent = `${currentLearningDay}일차 학습`;
             activeWordCardScreen.querySelector('.word-spelling').textContent = word.spelling;
             activeWordCardScreen.querySelector('.word-meaning').textContent = word.meaning;
+
+            const imageEl = activeWordCardScreen.querySelector('.word-image');
+            if (imageEl) {
+                if (word.image) {
+                    // 단어 데이터에 이미지 URL이 있는 경우 우선 사용
+                    imageEl.src = word.image;
+                } else {
+                    // 참고 이미지 데이터가 없으면 단어 스펠링으로 검색한 무료 이미지를 사용
+                    imageEl.src = `https://source.unsplash.com/featured/300x200/?${encodeURIComponent(word.spelling)}`;
+                }
+                imageEl.alt = word.spelling;
+            }
         }
     }
 
