@@ -1,191 +1,474 @@
 /* style.css */
 
 body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f7f6;
+    color: #333;
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background-color: #222;
-    margin: 0;
-    font-family: 'Press Start 2P', cursive; /* 픽셀 아트 폰트 */
-    color: #eee;
-    overflow-x: hidden; /* 가로 스크롤만 방지 */
-    overflow-y: auto; /* 세로 스크롤 허용 */
-    padding: 10px; /* 전체 게임 주변 여백 추가 */
 }
 
-#game-container {
-    display: flex; /* PC와 모바일 모두에서 게임 보드와 사이드 패널을 나란히 배치 */
-    /* flex-wrap: wrap; 제거 - 항상 한 줄로 유지 */
-    border: 8px solid #00f; /* 테두리 */
-    background-color: #000;
-    padding: 10px;
-    box-shadow: 0 0 20px rgba(0, 255, 255, 0.7);
-    border-radius: 5px;
-    /* width/max-width 제거 - 내부 콘텐츠가 너비를 정의하도록 함 */
-}
-
-#game-board {
-    display: grid;
-    grid-template-rows: repeat(20, 25px); /* 20줄 고정 */
-    grid-template-columns: repeat(10, 25px); /* 10칸 고정 */
-    background-color: #000;
-    border: 2px solid #555;
-    width: 250px; /* 고정 너비 */
-    height: 500px; /* 고정 높이 */
+#app-container {
+    width: 100%;
+    max-width: 420px; /* 스마트폰 화면 크기 */
+    height: 100vh; /* 뷰포트 높이에 맞춤 */
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden; /* 화면 전환 시 부드러운 효과를 위해 */
     position: relative;
 }
 
-.cell {
-    width: 25px; /* 고정 크기 유지 */
-    height: 25px; /* 고정 크기 유지 */
-    background-color: #111;
-    border: 1px solid #333;
-    box-sizing: border-box;
-    display: flex; /* 텍스트 중앙 배치 */
-    justify-content: center;
-    align-items: center;
-    font-size: 14px;
-    font-weight: bold;
-    color: #fff;
-}
-
-.tetromino {
-    background-color: #f00; /* 예시 색상 */
-    border: 2px outset #555;
-    box-shadow: inset 0 0 5px rgba(255, 255, 255, 0.5);
-}
-
-/* 개별 테트로미노 색상 (나중에 JS에서 동적으로 할당) */
-.I { background-color: cyan; }
-.J { background-color: blue; }
-.L { background-color: orange; }
-.O { background-color: yellow; }
-.S { background-color: limegreen; }
-.T { background-color: purple; }
-.Z { background-color: red; }
-
-
-#side-panel {
-    width: 150px; /* 고정 너비 */
-    padding: 10px;
-    margin-left: 20px; /* 고정 마진 */
-    background-color: #333;
-    border: 2px solid #555;
-    border-radius: 5px;
+.screen {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
     display: flex;
     flex-direction: column;
+    justify-content: center;
     align-items: center;
-    justify-content: space-around;
-    font-size: 14px;
+    padding: 20px;
+    box-sizing: border-box;
+    background-color: #fff;
+    transition: transform 0.5s ease-in-out;
+}
+
+.screen.hidden {
+    transform: translateX(100%);
+    display: none;
+}
+
+.screen.active {
+    transform: translateX(0);
+}
+
+/* 스플래시 화면 */
+#splash-screen {
+    background-color: #6200ee;
+    color: #fff;
+    font-size: 2em;
+    font-weight: bold;
+}
+
+#splash-screen .spinner {
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-top: 4px solid #fff;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    animation: spin 1s linear infinite;
+    margin-top: 20px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* 온보딩 화면 */
+.onboarding-screen {
     text-align: center;
 }
 
-#next-block-container, #score-container, #lines-container, #level-container {
+.onboarding-screen img {
+    max-width: 80%;
+    height: auto;
+    margin-bottom: 30px;
+}
+
+.onboarding-screen h2 {
+    color: #6200ee;
     margin-bottom: 15px;
-    background-color: #111;
-    padding: 8px;
-    border-radius: 3px;
-    width: 90%;
 }
 
-#next-block-container p, #score-container p, #lines-container p, #level-container p {
-    margin: 0 0 5px 0;
-    font-size: 12px;
-    color: #0ff;
+.onboarding-screen p {
+    color: #555;
+    line-height: 1.6;
 }
 
-#next-block {
-    display: grid;
-    grid-template-rows: repeat(4, 20px);
-    grid-template-columns: repeat(4, 20px);
-    width: 80px;
-    height: 80px;
-    background-color: #000;
-    border: 1px solid #555;
-    margin: 0 auto;
-    display: grid; /* 텍스트 중앙 정렬을 위해 추가 */
-    place-items: center; /* 텍스트 중앙 정렬 */
+.onboarding-navigation {
+    position: absolute;
+    bottom: 20px;
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+    padding: 0 20px;
+    box-sizing: border-box;
 }
 
-#score, #lines, #level {
-    font-size: 20px;
-    font-weight: bold;
-    color: #ff0;
-}
-
-#start-button {
-    background-color: #0a0;
-    color: white;
+.onboarding-navigation button {
+    background-color: #6200ee;
+    color: #fff;
     border: none;
     padding: 10px 20px;
-    font-size: 16px;
-    cursor: pointer;
     border-radius: 5px;
-    transition: background-color 0.2s;
+    font-size: 1em;
+    cursor: pointer;
 }
 
-#start-button:hover {
-    background-color: #0c0;
+.onboarding-dots {
+    position: absolute;
+    bottom: 80px;
+    display: flex;
+    gap: 8px;
 }
 
-/* 폰트 임포트 (Google Fonts) */
-@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+.dot {
+    width: 10px;
+    height: 10px;
+    background-color: #ccc;
+    border-radius: 50%;
+}
 
-/* 모바일 컨트롤 스타일 */
-#mobile-controls {
-    display: none; /* PC에서는 기본적으로 숨김 */
+.dot.active {
+    background-color: #6200ee;
+}
+
+/* 로그인/회원가입 화면 */
+#login-signup-screen {
+    background-color: #f0f2f5;
+}
+
+#login-signup-screen h2 {
+    color: #6200ee;
+    margin-bottom: 30px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+    width: 100%;
+    max-width: 300px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    color: #555;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+.btn-primary {
+    background-color: #6200ee;
+    color: #fff;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 5px;
+    font-size: 1.1em;
+    cursor: pointer;
+    width: 100%;
+    max-width: 300px;
+    margin-top: 20px;
+}
+
+.social-login-buttons {
+    margin-top: 30px;
+    display: flex;
     flex-direction: column;
-    align-items: center;
-    margin-top: 20px; /* 게임 컨테이너와의 간격 */
-    width: 100%; /* 부모 (body)의 너비를 따르지만 max-width로 제한 */
-    max-width: 300px; /* 버튼 레이아웃 최대 너비 */
+    gap: 10px;
+    width: 100%;
+    max-width: 300px;
 }
 
-.control-row {
+.social-login-buttons button {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    cursor: pointer;
+}
+
+.social-login-buttons button.google {
+    color: #db4437;
+}
+
+.social-login-buttons button.kakao {
+    background-color: #fee500;
+    color: #3c1e1e;
+}
+
+.social-login-buttons button img {
+    width: 20px;
+    height: 20px;
+}
+
+/* 단어 카드 화면 */
+.word-card {
+    border: 1px solid #eee;
+    border-radius: 10px;
+    padding: 30px;
+    text-align: center;
+    background-color: #fff;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    width: 90%;
+    max-width: 350px;
+    margin: auto;
+}
+
+.word-spelling {
+    font-size: 2.5em;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 15px;
+}
+
+.word-meaning {
+    font-size: 1.2em;
+    color: #666;
+    margin-bottom: 30px;
+}
+
+.word-card button {
+    background-color: #6200ee;
+    color: #fff;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 25px;
+    font-size: 1em;
+    cursor: pointer;
+    margin: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.word-card button:hover {
+    background-color: #3700b3;
+}
+
+/* 단어 퀴즈 화면 */
+#word-quiz-screen {
+    background-color: #e8eaf6;
+}
+
+#word-quiz-screen h2 {
+    color: #3f51b5;
+    margin-bottom: 30px;
+}
+
+.quiz-question {
+    font-size: 1.5em;
+    font-weight: bold;
+    margin-bottom: 20px;
+    text-align: center;
+    color: #333;
+}
+
+.quiz-options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+    max-width: 300px;
+}
+
+.quiz-options button {
+    background-color: #fff;
+    border: 1px solid #ccc;
+    padding: 15px;
+    border-radius: 8px;
+    font-size: 1.1em;
+    cursor: pointer;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.quiz-options button:hover {
+    background-color: #f0f0f0;
+    border-color: #6200ee;
+}
+
+.quiz-options button.correct {
+    background-color: #a5d6a7;
+    border-color: #4caf50;
+    color: #1b5e20;
+}
+
+.quiz-options button.incorrect {
+    background-color: #ffcdd2;
+    border-color: #f44336;
+    color: #b71c1c;
+}
+
+.quiz-feedback {
+    margin-top: 20px;
+    font-size: 1.1em;
+    font-weight: bold;
+}
+
+.quiz-input {
+    width: 100%;
+    max-width: 300px;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-sizing: border-box;
+    margin-top: 20px;
+    font-size: 1.1em;
+}
+
+.quiz-submit-button {
+    background-color: #3f51b5;
+    color: #fff;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 25px;
+    font-size: 1em;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: background-color 0.3s ease;
+}
+
+.quiz-submit-button:hover {
+    background-color: #303f9f;
+}
+
+/* 나만의 단어장 화면 */
+#my-wordbook-screen {
+    background-color: #e0f2f7;
+}
+
+#my-wordbook-screen h2 {
+    color: #0097a7;
+    margin-bottom: 30px;
+}
+
+.wordbook-list {
+    width: 100%;
+    max-width: 380px;
+    margin-top: 20px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    overflow: hidden;
+}
+
+.wordbook-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    border-bottom: 1px solid #eee;
+}
+
+.wordbook-item:last-child {
+    border-bottom: none;
+}
+
+.wordbook-item span {
+    font-size: 1.1em;
+    color: #333;
+}
+
+.wordbook-item button {
+    background-color: #00bcd4;
+    color: #fff;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: background-color 0.3s ease;
+}
+
+.wordbook-item button:hover {
+    background-color: #00838f;
+}
+
+/* 학습 리포트 화면 */
+#learning-report-screen {
+    background-color: #fff3e0;
+}
+
+#learning-report-screen h2 {
+    color: #f57c00;
+    margin-bottom: 30px;
+}
+
+.report-stats {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    max-width: 380px;
+    margin-bottom: 30px;
+}
+
+.stat-box {
+    text-align: center;
+    padding: 15px;
+    border: 1px solid #ffcc80;
+    border-radius: 10px;
+    background-color: #ffe0b2;
+    flex: 1;
+    margin: 0 5px;
+}
+
+.stat-box h3 {
+    color: #e65100;
+    margin-bottom: 5px;
+}
+
+.stat-box p {
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #f57c00;
+}
+
+.chart-container {
+    width: 90%;
+    max-width: 380px;
+    height: 200px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
     display: flex;
     justify-content: center;
+    align-items: center;
+    color: #999;
+}
+
+/* 설정 화면 */
+#settings-screen {
+    background-color: #fbe9e7;
+}
+
+#settings-screen h2 {
+    color: #d84315;
+    margin-bottom: 30px;
+}
+
+.setting-item {
     width: 100%;
-    margin-bottom: 10px;
+    max-width: 380px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 0;
+    border-bottom: 1px solid #f9ccc7;
 }
 
-#mobile-controls button {
-    background-color: #555;
-    color: white;
-    border: 2px solid #777;
-    padding: 15px 25px;
-    margin: 0 5px;
-    font-size: 20px;
-    cursor: pointer;
-    border-radius: 8px;
-    transition: background-color 0.2s, transform 0.1s;
-    flex: 1; /* 공간을 균등하게 분배 */
-    max-width: 100px; /* 버튼 최대 너비 제한 */
+.setting-item:last-child {
+    border-bottom: none;
 }
 
-#mobile-controls button:active {
-    background-color: #777;
-    transform: translateY(2px);
+.setting-item label {
+    font-size: 1.1em;
+    color: #333;
 }
 
-/* 모바일 환경에서만 컨트롤 표시 */
-@media (max-width: 768px) {
-    /* 모바일에서는 #mobile-controls만 표시되도록 변경 */
-    #mobile-controls {
-        display: flex; /* 모바일에서만 표시 */
-        margin: 20px auto 0 auto; /* 상단 마진 20px, 좌우 자동 마진으로 중앙 정렬 */
-        max-width: 300px; /* 버튼 레이아웃 최대 너비 */
-    }
-
-    body {
-        flex-direction: column;
-    }
-
-    #game-container {
-        margin: 0 auto;
-        width: 100%;
-        max-width: 420px; /* 게임 보드(250) + 사이드 패널(150) + 마진/패딩(20) = 420px */
-    }
-    /* body의 padding을 모바일에서 조금 더 줄 수 있음 (선택 사항) */
-    /* body { padding: 10px; } */
+.setting-item select, .setting-item input[type="checkbox"] {
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #f44336;
 }
