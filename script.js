@@ -14,7 +14,11 @@ document.addEventListener('DOMContentLoaded', () => {
             activeScreen.classList.add('active');
             // 화면이 활성화될 때마다 특정 이벤트 리스너를 다시 연결해야 하는 경우 여기에 추가
             if (screenId.startsWith('onboarding-screen-')) {
-                setupOnboardingNavigation();
+                renderOnboardingScreen(currentOnboardingScreen); // 화면 내용 다시 렌더링
+                // setupOnboardingNavigation(); // renderOnboardingScreen에서 호출하도록 변경
+            }
+            if (screenId === 'login-signup-screen') {
+                setupLoginSignupListeners();
             }
             if (screenId === 'main-dashboard-screen') {
                 setupMainDashboardListeners();
@@ -23,18 +27,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 setupLearningSelectionListeners();
             }
             if (screenId === 'word-card-screen') {
+                renderWordCardScreen(); // 단어 카드 내용 업데이트
                 setupWordCardListeners();
             }
             if (screenId === 'word-quiz-screen') {
+                renderWordQuizScreen(); // 퀴즈 내용 업데이트
                 setupWordQuizListeners();
             }
             if (screenId === 'my-wordbook-screen') {
+                renderMyWordbookScreen(); // 단어장 내용 업데이트
                 setupMyWordbookListeners();
             }
             if (screenId === 'learning-report-screen') {
+                renderLearningReportScreen(); // 리포트 내용 업데이트
                 setupLearningReportListeners();
             }
             if (screenId === 'settings-screen') {
+                renderSettingsScreen(); // 설정 내용 업데이트
                 setupSettingsListeners();
             }
         }
@@ -106,10 +115,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 <button id="next-onboarding">${screenNum === totalOnboardingScreens ? '시작하기' : '다음'}</button>`;
         }
 
-        // 온보딩 화면이 렌더링될 때마다 내비게이션 리스너를 다시 설정
-        if (document.getElementById(`onboarding-screen-${screenNum}`).classList.contains('active')) {
-            setupOnboardingNavigation();
-        }
+        // 온보딩 화면의 DOM이 업데이트된 후에 내비게이션 리스너를 다시 설정
+        setupOnboardingNavigation();
     }
 
     function setupOnboardingNavigation() {
@@ -117,6 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const prevButton = document.getElementById('prev-onboarding');
         const currentScreenElement = document.querySelector('.onboarding-screen.active');
 
+        // 현재 활성화된 온보딩 화면이 없으면 리스너를 설정하지 않음
         if (!currentScreenElement) return;
 
         const screenNum = parseInt(currentScreenElement.id.split('-')[2]);
@@ -125,8 +133,8 @@ document.addEventListener('DOMContentLoaded', () => {
             nextButton.onclick = () => {
                 if (screenNum < totalOnboardingScreens) {
                     currentOnboardingScreen++;
-                    renderOnboardingScreen(currentOnboardingScreen); // 다음 화면 내용을 렌더링
-                    showScreen(`onboarding-screen-${currentOnboardingScreen}`); // 다음 화면 활성화
+                    // renderOnboardingScreen(currentOnboardingScreen); // 다음 화면 내용은 showScreen에서 업데이트
+                    showScreen(`onboarding-screen-${currentOnboardingScreen}`); 
                 } else {
                     showScreen('login-signup-screen');
                 }
@@ -137,12 +145,12 @@ document.addEventListener('DOMContentLoaded', () => {
             prevButton.onclick = () => {
                 if (screenNum > 1) {
                     currentOnboardingScreen--;
-                    renderOnboardingScreen(currentOnboardingScreen); // 이전 화면 내용을 렌더링
-                    showScreen(`onboarding-screen-${currentOnboardingScreen}`); // 이전 화면 활성화
+                    // renderOnboardingScreen(currentOnboardingScreen); // 이전 화면 내용은 showScreen에서 업데이트
+                    showScreen(`onboarding-screen-${currentOnboardingScreen}`); 
                 }
             };
         }
-        // 점 업데이트
+        // 점 업데이트 (setupOnboardingNavigation 내에서 처리)
         document.querySelectorAll('.onboarding-dots .dot').forEach((dot, index) => {
             if (index + 1 === screenNum) {
                 dot.classList.add('active');
@@ -586,9 +594,12 @@ document.addEventListener('DOMContentLoaded', () => {
     function initializeApp() {
         // 모든 화면을 한 번만 DOM에 추가하고 hidden 상태로 둡니다.
         renderSplashScreen();
-        renderOnboardingScreen(1);
-        renderOnboardingScreen(2);
-        renderOnboardingScreen(3);
+        // 모든 온보딩 화면은 renderOnboardingScreen 함수 내에서 순차적으로 관리됩니다.
+        // 초기 렌더링 시에는 첫 번째 온보딩 화면만 active 상태로 두고 나머지는 hidden으로 둠
+        renderOnboardingScreen(1); 
+        renderOnboardingScreen(2); 
+        renderOnboardingScreen(3); 
+
         renderLoginSignupScreen();
         renderMainDashboardScreen();
         renderLearningSelectionScreen();
@@ -599,6 +610,7 @@ document.addEventListener('DOMContentLoaded', () => {
         renderSettingsScreen();
 
         // 초기화 시점에 모든 화면의 리스너를 연결 (새로 생성된 요소에 연결되도록)
+        // setupOnboardingNavigation(); // renderOnboardingScreen에서 호출하도록 변경
         setupLoginSignupListeners();
         setupMainDashboardListeners();
         setupLearningSelectionListeners();
@@ -607,6 +619,8 @@ document.addEventListener('DOMContentLoaded', () => {
         setupMyWordbookListeners();
         setupLearningReportListeners();
         setupSettingsListeners();
+
+        showScreen('splash-screen'); // 초기 화면은 스플래시로 설정
     }
 
     initializeApp();
