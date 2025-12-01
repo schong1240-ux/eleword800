@@ -347,6 +347,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const imageEl = activeWordCardScreen.querySelector('.word-image');
             if (imageEl) {
+                // 이미지 로드 실패 시 깨진 아이콘 대신 이미지를 숨기기 위한 처리
+                imageEl.onerror = () => {
+                    imageEl.style.display = 'none';
+                };
+
                 if (word.image) {
                     // 단어 데이터에 이미지 URL이 있는 경우 우선 사용
                     imageEl.src = word.image;
@@ -355,6 +360,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     imageEl.src = `https://source.unsplash.com/featured/300x200/?${encodeURIComponent(word.spelling)}`;
                 }
                 imageEl.alt = word.spelling;
+                imageEl.style.display = 'block';
             }
         }
     }
@@ -467,7 +473,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <button class="btn-primary" id="quiz-back-button" style="margin-top: 20px;">뒤로</button>
                 </div>
             `);
-        } else {
+    } else {
             wordQuizScreenElement.querySelector('#quiz-content').innerHTML = quizContentHtml;
             wordQuizScreenElement.querySelector('.quiz-feedback').textContent = ''; // 피드백 초기화
         }
