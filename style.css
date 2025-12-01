@@ -367,34 +367,34 @@ button:hover {
 /* 학습일 선택 화면 */
 #day-selection-screen {
     background-color: var(--background-color);
-    padding-top: 40px;
+    padding-top: 24px; /* 위 여백을 줄여 전체 높이 확보 */
     justify-content: flex-start;
 }
 
 #day-selection-screen h2 {
     color: var(--primary-dark-color);
-    margin-bottom: 35px;
-    font-size: 2.2em;
+    margin-bottom: 20px; /* 제목과 그리드 간 간격 축소 */
+    font-size: 2em;
     font-weight: 700;
 }
 
 .day-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 12px;
+    gap: 10px; /* 세로/가로 간격 약간 축소 */
     width: 100%;
     max-width: 380px;
     padding: 0 10px;
-    margin-bottom: 40px;
+    margin-bottom: 24px; /* 그리드 아래 여백 축소 */
 }
 
 .day-button {
     background-color: var(--surface-color);
     color: var(--text-color-dark);
     border: 1px solid var(--border-color);
-    padding: 18px 10px;
-    border-radius: 12px;
-    font-size: 1.3em;
+    padding: 14px 8px; /* 버튼 패딩 축소 */
+    border-radius: 10px;
+    font-size: 1.1em;  /* 글자 크기 약간 축소 */
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -402,7 +402,7 @@ button:hover {
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 65px;
+    min-height: 54px; /* 세로 높이 축소로 한 화면에 8행이 들어가도록 조정 */
 }
 
 .day-button:hover {
