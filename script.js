@@ -12,15 +12,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // showScreen 함수 내의 render 호출 순서를 변경하여 탭바가 항상 맨 아래에 있도록 합니다.
     function showScreen(screenId) {
-        document.querySelectorAll('.screen').forEach(screen => {
-            screen.classList.remove('active');
-            screen.classList.add('hidden');
+        console.log(`Attempting to show screen: ${screenId}`);
+        const allScreens = document.querySelectorAll('.screen');
+        allScreens.forEach(screen => {
+            if (screen.id === screenId) {
+                screen.classList.remove('hidden');
+                screen.classList.add('active');
+                screen.style.display = 'flex'; // 활성화 시 flex로 설정
+            } else {
+                screen.classList.remove('active');
+                screen.classList.add('hidden');
+                screen.style.display = 'none'; // 숨김 시 display: none
+            }
         });
+
         const activeScreen = document.getElementById(screenId);
         if (activeScreen) {
-            activeScreen.classList.remove('hidden');
-            activeScreen.classList.add('active');
-            
+            console.log(`Screen ${screenId} is active.`);
             // 각 화면이 활성화될 때마다 해당 화면의 내용을 다시 렌더링하고 리스너를 설정
             if (screenId.startsWith('onboarding-screen-')) {
                 renderOnboardingScreen(currentOnboardingScreen); // 화면 내용 다시 렌더링
@@ -52,6 +60,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 renderSettingsScreen(); // 설정 내용 업데이트
                 setupSettingsListeners();
             }
+        } else {
+            console.error(`Error: Screen with ID ${screenId} not found.`);
         }
     }
 
@@ -116,9 +126,21 @@ document.addEventListener('DOMContentLoaded', () => {
             onboardingScreenElement.querySelector('p').textContent = description;
             onboardingScreenElement.querySelector('.onboarding-dots').innerHTML = 
                 `${Array.from({ length: totalOnboardingScreens }, (_, i) => `<span class="dot ${i + 1 === screenNum ? 'active' : ''}"></span>`).join('')}`;
-            onboardingScreenElement.querySelector('.onboarding-navigation').innerHTML = 
-                `${screenNum > 1 ? '<button id="prev-onboarding">이전</button>' : '<span></span>'}
-                <button id="next-onboarding">${screenNum === totalOnboardingScreens ? '시작하기' : '다음'}</button>`;
+            // 내비게이션 버튼을 동적으로 업데이트하는 대신, 항상 존재하도록 하고 텍스트만 변경
+            const nextBtn = onboardingScreenElement.querySelector('#next-onboarding');
+            if (nextBtn) {
+                nextBtn.textContent = screenNum === totalOnboardingScreens ? '시작하기' : '다음';
+            }
+            const prevNavDiv = onboardingScreenElement.querySelector('.onboarding-navigation > span');
+            if (screenNum > 1 && !onboardingScreenElement.querySelector('#prev-onboarding')) {
+                // 이전 버튼이 없으면 추가
+                onboardingScreenElement.querySelector('.onboarding-navigation').insertAdjacentHTML('afterbegin', '<button id="prev-onboarding">이전</button>');
+            } else if (screenNum === 1 && onboardingScreenElement.querySelector('#prev-onboarding')) {
+                // 첫 화면이면 이전 버튼 제거
+                onboardingScreenElement.querySelector('#prev-onboarding').remove();
+                // 비어있는 span을 다시 추가하여 레이아웃 유지
+                onboardingScreenElement.querySelector('.onboarding-navigation').insertAdjacentHTML('afterbegin', '<span></span>');
+            }
         }
 
         // 온보딩 화면의 DOM이 업데이트된 후에 내비게이션 리스너를 다시 설정
@@ -127,15 +149,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function setupOnboardingNavigation() {
         const currentScreenElement = document.querySelector('.onboarding-screen.active');
-        if (!currentScreenElement) return;
+        if (!currentScreenElement) {
+            console.warn('No active onboarding screen found for navigation setup.');
+            return;
+        }
 
-        const nextButton = currentScreenElement.querySelector('#next-onboarding'); // 활성화된 화면 내부에서 버튼 선택
-        const prevButton = currentScreenElement.querySelector('#prev-onboarding'); // 활성화된 화면 내부에서 버튼 선택
+        const nextButton = currentScreenElement.querySelector('#next-onboarding');
+        const prevButton = currentScreenElement.querySelector('#prev-onboarding');
         
         const screenNum = parseInt(currentScreenElement.id.split('-')[2]);
 
         if (nextButton) {
             nextButton.onclick = () => {
+                console.log(`Next button clicked on screen ${screenNum}`);
                 if (screenNum < totalOnboardingScreens) {
                     currentOnboardingScreen++;
                     showScreen(`onboarding-screen-${currentOnboardingScreen}`); 
@@ -147,6 +173,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (prevButton) {
             prevButton.onclick = () => {
+                console.log(`Previous button clicked on screen ${screenNum}`);
                 if (screenNum > 1) {
                     currentOnboardingScreen--;
                     showScreen(`onboarding-screen-${currentOnboardingScreen}`); 
@@ -663,8 +690,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 초기화 함수
     function initializeApp() {
+        console.log('initializeApp called.');
         chunkWordsByDay(); // 단어를 날짜별로 묶음
 
+        // 모든 화면을 한 번만 DOM에 추가하고 hidden 상태로 둡니다.
         renderSplashScreen();
         renderOnboardingScreen(1); 
         renderOnboardingScreen(2); 
@@ -673,18 +702,20 @@ document.addEventListener('DOMContentLoaded', () => {
         renderLoginSignupScreen();
         renderMainDashboardScreen();
         renderLearningSelectionScreen();
-        renderDaySelectionScreen(); // 학습일 선택 화면 미리 렌더링
+        renderDaySelectionScreen(); 
         renderWordCardScreen();
         renderWordQuizScreen();
         renderMyWordbookScreen();
         renderLearningReportScreen();
         renderSettingsScreen();
 
-        // 초기화 시점에 모든 화면의 리스너를 연결 (새로 생성된 요소에 연결되도록)
+        // 모든 화면의 리스너를 초기화 시점에 연결합니다.
+        // showScreen 함수가 호출될 때마다 해당 화면의 리스너를 다시 설정하도록 변경했습니다.
+        // 온보딩 리스너는 renderOnboardingScreen에서 호출됨
         setupLoginSignupListeners();
         setupMainDashboardListeners();
         setupLearningSelectionListeners();
-        setupDaySelectionListeners(); // 학습일 선택 화면 리스너 설정
+        setupDaySelectionListeners(); 
         setupWordCardListeners();
         setupWordQuizListeners();
         setupMyWordbookListeners();
@@ -692,6 +723,7 @@ document.addEventListener('DOMContentLoaded', () => {
         setupSettingsListeners();
 
         showScreen('splash-screen'); // 초기 화면은 스플래시로 설정
+        console.log('Splash screen activated.');
     }
 
     initializeApp();
