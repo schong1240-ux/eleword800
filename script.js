@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const appContainer = document.getElementById('app-container');
 
     // 전역 변수 설정
-    let myWordbook = []; // 사용자 단어장 데이터
+    let myWordbook = []; // 사용자 단어장 데이터 (전역으로 한 번만 선언)
     let wordsByDay = []; // 날짜별 단어 묶음
     const wordsPerDay = 25;
     const totalLearningDays = Math.ceil(words.length / wordsPerDay); // 총 학습 일수 (32일)
@@ -523,7 +523,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 나만의 단어장 화면
-    let myWordbook = [];
+    // let myWordbook = []; // 사용자 단어장 데이터 - 전역으로 선언되었으므로 여기서 다시 선언하지 않음
     function renderMyWordbookScreen() {
         const myWordbookScreenElement = document.getElementById('my-wordbook-screen');
         if (!myWordbookScreenElement) {
@@ -531,24 +531,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div id="my-wordbook-screen" class="screen hidden">
                     <h2>나만의 단어장</h2>
                     <div class="wordbook-list"></div>
-                    <button class="btn-primary" id="wordbook-back-button" style="margin-top: 20px;">뒤로</button>
+                    <button class="btn-primary" id="wordbook-back-button" style="margin-top: 30px;">뒤로</button>
                 </div>
             `);
         }
         // 단어장 목록 업데이트
         const wordbookList = document.querySelector('#my-wordbook-screen .wordbook-list');
         if (wordbookList) {
-            wordbookList.innerHTML = `
-                ${myWordbook.length > 0 ? 
+            if (myWordbook.length === 0) {
+                wordbookList.innerHTML = '<p>아직 단어가 없습니다.</p>';
+            } else {
+                wordbookList.innerHTML = 
                     myWordbook.map(word => `
                         <div class="wordbook-item">
                             <span>${word.spelling} - ${word.meaning} (${word.status === 'memorized' ? '암기 완료' : '어려운 단어'})</span>
                             <button data-spelling="${word.spelling}">삭제</button>
                         </div>
-                    `).join('') 
-                    : '<p>아직 단어가 없습니다.</p>'
-                }
-            `;
+                    `).join('');
+            }
         }
     }
 
