@@ -523,7 +523,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 나만의 단어장 화면
-    // let myWordbook = []; // 사용자 단어장 데이터 - 전역으로 선언되었으므로 여기서 다시 선언하지 않음
     function renderMyWordbookScreen() {
         const myWordbookScreenElement = document.getElementById('my-wordbook-screen');
         if (!myWordbookScreenElement) {
